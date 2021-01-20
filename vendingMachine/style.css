@@ -1,0 +1,34 @@
+.itemsTable {
+    padding: 0 50px;
+    text-align: center;
+}
+
+table, tr, td {
+    border: 1px solid #808080;
+    border-spacing: 0;
+}
+
+td {
+    padding: 10px;
+}
+
+h2 {
+    padding: 0 50px;
+}
+
+.slide12 {
+    margin: 50px;
+}
+
+.inputGroup {
+    margin: 10px;
+}
+
+.label {
+    width: 125px;
+    display: inline-block;
+}
+
+.btn {
+    margin: 10px;
+}
