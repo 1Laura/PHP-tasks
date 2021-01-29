@@ -11,6 +11,15 @@ class Validation
         }
     }
 
+//    public function cleanAndReturnRadioBox($var)
+//    {
+//        if (isset($_POST[$var])) {
+//            return $_POST[$var];
+//        } else {
+//            $this->validErrors[$var] = 'not set genre';
+//        }
+//    }
+
     public function cleanAndReturnPostVar($var)
     {
         if ($this->isSetAndNotEmptyPostVar($var)) {
@@ -24,9 +33,11 @@ class Validation
 
     public function isSetAndNotEmptyPostVar($var)
     {
-        if (!empty($_POST[$var]) && isset($_POST[$var])) {
-            // kintamasis nusatytas ir ne tuscias
-            return true;
+        if (isset($_POST[$var]) && !empty($_POST[$var])) {
+            if (trim($_POST[$var]) !== '') {
+                // kintamasis nusatytas ir ne tuscias
+                return true;
+            }
         }
     }
 
@@ -34,17 +45,25 @@ class Validation
     {
         // nutrinti white space tuscius tarpus
         $trimmed = trim($_POST[$var]);
-        $safeVar = htmlspecialchars($trimmed);
-        return $safeVar;
+        $safe = htmlspecialchars($trimmed);
+        return $safe;
     }
 
     public function showValidationErrors()
     {
         if (!empty($this->validErrors)) {
-            var_dump($this->validErrors);
+            print_r($this->validErrors);
         }
 
     }
+
+    public function getValidationErrors()
+    {
+        if (!empty($this->validErrors)) {
+            return $this->validErrors;
+        }
+    }
+
 
     public function thereAreNoErrors()
     {

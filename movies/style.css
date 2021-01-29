@@ -27,3 +27,48 @@ body {
 img {
     width: 100%;
 }
+
+.card.large {
+    width: initial;
+}
+
+.error-input {
+    /*background-color: #cb9085;*/
+    border-color: #cb9085;
+    outline-color: tomato;
+    /*box-shadow: 0 0 0 0.2rem rgb(231, 2, 2);*/
+}
+
+
+
+.error-msg {
+    color: tomato;
+    text-align: center;
+    background-color: #ffd8d0;
+
+}
+
+/*Login form stuff*/
+
+.overlay {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: translateX(100%);
+    transition: transform 0.2s ease-in-out, background-color 1s ease-in;
+}
+
+.overlay.active {
+    transform: translateX(0%);
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.form-container {
+    width: 60%;
+    height: 40%;
+    background-color: white;
+
+}

@@ -10,80 +10,116 @@ class DataBase
     private $dataBaseName = 'movies';
 
     //prisijungima saugantis kintamasis
-    public $status;
     public $conn;
 
     public function __construct()
     {
         $this->conn = new mysqli($this->serverName, $this->userName, $this->password, $this->dataBaseName);
+
         if ($this->conn->connect_error) {
-            die('kazkas neveikia: ' . $this->conn->connect_error);
+            die('kazkas atsitiko: ' . $this->conn->connect_error);
         }
-        $this->status = "Prisijungem";
+
+        if (!isset($_SESSION['statusArr'])) {
+            $_SESSION['statusArr'] = [];
+        }
+        $_SESSION['statusArr'][] = 'Pavyko prisijungti prrie DATABASE';
     }
 
     //Pagal turimas žinias phpmyadmin susikurti naują duombazę, ir joje lentelę su 6 stulpeliais:
     //id (int) - autoincrement;  //img (varchar) - simbolių 255; //title(varchar) - simbolių 255;
     //year (year);  //genre (varchar) - simbolių 255;  //created (timestamp) - current timestamp;
-
-    public function createDbTable()
-    {
-        $sql = "CREATE TABLE movies(`id` INT(3) UNSIGNED AUTO_INCREMENT primary  key ,
-     `img` VARCHAR(255),
-      `title` VARCHAR(255),
-       `year` YEAR,
-        `genre` VARCHAR(255),
-         `created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)";
-        $this->makeQuery($sql, 'Movies lentele sukurta sekmingai');
-    }
+    // LENTELE SUSIKURIAI PHP MY ADMINE
 
     //Add Movie to DB===============================================================================================
     //>> Paspaudus mygtuką ‘Add Movie’ PHP & JS pagalba įdedate įrašą į duombazę.
     //>> Sėkmingo įtraukimo į DB atveju, stilizuota žinutė, kad pavyko.
     //>> Bonus task* - Validacija ar laukeliai nėra tušti (t.y. turi būti supildyti), jei tušti - žinutė;
 
-    //funkcija, kad pridetu viena posta
+    //funkcija, kad ADD viena posta=====================================================================================
     public function addMovie($img, $title, $year, $genre)
     {
         $sql = "INSERT INTO `movies`(`img`, `title`, `year`, `genre`) VALUES ('$img', '$title', '$year', '$genre')";
-        $this->makeQuery($sql, 'Movie pridetas sekmingai');
+        $this->makeQuery($sql, 'Movie added sekmingai');
     }
 
-    //metodas gauti visus movies is musu Post lenteles
-    public function getMovies()
+    //funkcija, kad EDIT posta==========================================================================================
+    public function editMovie($id, $img, $title, $year, $genre)
     {
-        // $sql = "SELECT * FROM Posts";
-        $sql = "SELECT * FROM `movies` ORDER BY `movies`.`created` DESC";
-        // $mysqliResultObj turi savybe num_rows
-        $mysqliResultObj = $this->conn->query($sql);
-        if ($mysqliResultObj->num_rows > 0) {
-            //gauta daugiau nei nulis eiluciu
-            return $mysqliResultObj->fetch_all(MYSQLI_ASSOC);
-        } else {
-            $this->status = "Klaida: radom 0 eiluciu";
-        }
+        $sql = "UPDATE `movies` SET `img`='$img',`title`='$title',`year`='$year',`genre`='$genre' WHERE `id`='$id' limit 1";
+        $this->makeQuery($sql, 'Movie update pavyko');
     }
 
+    //funkcija, kad DELETE posta========================================================================================
+    public function deleteMovie($id)
+    {
+        $sql = "DELETE FROM movies WHERE `id`='$id' LIMIT 1";
+        $this->makeQuery($sql, 'Movie delete sekmingai');
+    }
 
-    //pagalbines funkcijos==========================================================================================
+    //pagalbinis metodas atlikti uzklausa ir gauti feedback=============================================================
     private function makeQuery($sql, $msg)
     {
         if ($this->conn->query($sql) === true) {
-            $this->status = $msg;
+            $_SESSION['statusArr'][] = $msg;
         } else {
-            $this->status = "Klaida:  {$this->conn->error}";
+            $_SESSION['statusArr'][] = "Klaida:  {$this->conn->error}";
         }
     }
 
-    // helper klase atvaizduoti feedback taip kaip mes norim
-    public function showStatus()
+    //metodas gauti visus movies is musu movies lenteles==================================================================
+    public function getMovies()
+    {
+        $sql = "SELECT * FROM `movies` ORDER BY `movies`.`created` DESC";
+        $mysqliResultObj = $this->conn->query($sql);
+        if ($mysqliResultObj->num_rows > 0) {
+            $_SESSION['statusArr'][] = "Gaunam {$mysqliResultObj->num_rows} movies";
+            return $mysqliResultObj->fetch_all(MYSQLI_ASSOC);
+        } else {
+            $_SESSION['statusArr'][] = "Klaida: radom 0 movies";
+        }
+    }
+
+    //metodas gauti viena movie is musu movies lenteles==================================================================
+    public function getMovie($id)
+    {
+        $sql = "SELECT * FROM `movies` WHERE `id`='$id'";
+        $mysqliResultObj = $this->conn->query($sql);
+        if ($mysqliResultObj->num_rows > 0) {
+//            $_SESSION['statusArr'][] = "Gaunam {$mysqliResultObj->num_rows} movies";
+            return $mysqliResultObj->fetch_assoc();
+        } else {
+            $_SESSION['statusArr'][] = "Klaida: radom 0 movies";
+        }
+    }
+
+
+    // helper f-ja atvaizduoti feedback taip kaip mes norim=============================================================
+    public function showStatus($status)
     {
         ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?php echo $this->status ?>
+            <?php echo $status ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         <?php
+    }
+
+    public function showStatusArray()
+    {
+        $reverseArr = array_reverse($_SESSION['statusArr']);
+        foreach ($reverseArr as $index => $statusMsg) {
+            if ($index < 3) {
+                $this->showStatus($statusMsg);
+            } else {
+                break;
+            }
+        }
+        if (count($_SESSION['statusArr']) > 10) {
+            $count = count($_SESSION['statusArr']);
+            array_splice($_SESSION['statusArr'], 0, $count - 10);
+        }
+
     }
 
     // duomenu bazes susijungimu uzdarymas
@@ -91,6 +127,4 @@ class DataBase
     {
         $this->conn->close();
     }
-
-
 }
